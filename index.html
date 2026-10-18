@@ -28,8 +28,16 @@ svg{width:100%;height:auto;display:block}
 .m b{white-space:nowrap}
 details summary{cursor:pointer;color:var(--mut);font-size:13px}
 table{width:100%;font-size:13px;border-collapse:collapse;margin-top:6px}td,th{padding:3px 4px;text-align:right}
+.tabs{display:flex;gap:8px;margin-bottom:10px}.tabs button{flex:1;font-weight:700}.tabs button.on{background:var(--a);color:#fff;border-color:var(--a)}
+.two{display:flex;gap:12px}.two>div{flex:1}.big2{font-size:26px;font-weight:800}
+:root{--r:#c0392b;--b:#2563eb}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--r:#f87171;--b:#60a5fa}}:root[data-theme="dark"]{--r:#f87171;--b:#60a5fa}
+.r{color:var(--r)}.bl{color:var(--b)}[hidden]{display:none!important}
+textarea{width:100%;box-sizing:border-box;margin-top:6px;padding:8px;font:12px/1.3 ui-monospace,monospace;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg)}
 </style></head><body>
-<h1>Apuração 2º turno: 2026 x 2022</h1>
+<h1>Apuração 2º turno 2026</h1>
+<div class="tabs"><button id="tA" class="on">Apuração</button><button id="tP">Pesquisas</button></div>
+<div id="bnote" class="card" hidden style="border-color:var(--p);display:flex;gap:8px;align-items:center;justify-content:space-between"><span style="font-size:14px">⚠ Seus dados ainda não têm backup.</span><button id="bgo" style="flex:none">Fazer backup</button></div>
+<div id="pA">
 
 <div class="card">
 <div class="row">
@@ -55,6 +63,36 @@ table{width:100%;font-size:13px;border-collapse:collapse;margin-top:6px}td,th{pa
 <table><tr><th>% urnas</th><th>Bolsonaro</th><th>Lula</th></tr><tbody id="t22"></tbody></table>
 <div class="mut" style="margin-top:6px">Entre os pontos o app liga uma linha reta. Abaixo de 15,34% não há dado: em 2022 Lula começou na frente e logo foi ultrapassado, então a comparação com 2022 não vale nessa faixa. Fontes: TSE e Agência Brasil.</div></details></div>
 
+</div>
+<div id="pP" hidden>
+<div class="card"><div class="two">
+<div><div class="mut" id="qh1">Média hoje</div><div><span class="r">Flávio</span> <span class="big2 r" id="qmF"></span></div><div><span class="bl">Lula</span> <span class="big2 bl" id="qmL"></span></div><div class="mut" id="qmN"></div></div>
+<div><div class="mut">Projeção para 25/10</div><div><span class="r">Flávio</span> <span class="big2 r" id="qpF"></span></div><div><span class="bl">Lula</span> <span class="big2 bl" id="qpL"></span></div><div class="mut" id="qpI"></div></div>
+</div>
+<div class="sc" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line)"><div class="mut">Chance de vitória (segundo as pesquisas)</div><div class="big"><span class="r" id="qcF"></span> · <span class="bl" id="qcL"></span></div></div>
+</div>
+<div class="card"><svg id="qs" viewBox="0 0 360 270"></svg>
+<div class="mut">Pontos: pesquisas (votos válidos), maiores = mais peso. Linha: tendência. Tracejado: projeção até 25/10. Faixa: intervalo de 95%.</div></div>
+<div class="card"><b>Margem de erro das pesquisas</b>
+<div class="row" style="align-items:center;margin-top:6px"><label style="flex:1">Erro típico (pontos)<input id="pErr" inputmode="decimal" value="2,5"></label><div class="mut" style="flex:2">Quanto maior, mais perto de 50% a chance fica. No 1º turno de 2026 as pesquisas erraram o Flávio em 2 a 5 pontos.</div></div></div>
+<div class="card"><b>Adicionar pesquisa</b>
+<div class="row" style="margin-top:6px"><label style="flex:2">Instituto<input id="qi" placeholder="Datafolha" style="font-size:16px"></label><label>Data final<input id="qd" type="date" style="font-size:14px"></label></div>
+<div class="row" style="margin-top:6px"><label>Amostra<input id="qn" inputmode="numeric" placeholder="2000"></label><label>% Flávio<input id="qf" inputmode="decimal" placeholder="51"></label><label>% Lula<input id="ql" inputmode="decimal" placeholder="49"></label></div>
+<div class="mut" style="margin-top:6px">Use votos válidos (os dois somam 100). Digite um e o outro completa.</div>
+<div class="err" id="qerr"></div><div class="btns"><button class="main" id="qadd">Adicionar pesquisa</button></div></div>
+<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><b>Pesquisas (<span id="qcnt"></span>)</b><button id="qres">Restaurar lista</button></div><div id="ql2"></div>
+<div class="mut" style="margin-top:8px">Lista inicial: 18 pesquisas do 2º turno em votos válidos, compiladas pelo The Rio Times a partir dos registros do TSE (até 18/10). Pesquisas mais novas não estão incluídas: adicione à mão.</div></div>
+</div>
+<div class="card" id="bk"><b>Backup dos dados</b>
+<div class="mut" id="bst" style="margin:4px 0"></div>
+<div class="mut" id="bst2"></div>
+<textarea id="bt" readonly rows="3"></textarea>
+<div class="btns"><button id="bcp">Copiar backup</button><button id="bdl">Baixar arquivo</button></div>
+<div class="mut" style="margin-top:12px">Restaurar: cole o texto do backup ou escolha o arquivo.</div>
+<textarea id="bi" rows="3" placeholder="Cole aqui o backup"></textarea>
+<div class="btns"><button id="bim">Restaurar texto</button><button id="bfl">Escolher arquivo</button></div>
+<input type="file" id="bf" accept=".json,application/json,text/plain" hidden>
+<div class="err" id="bmsg"></div></div>
 <script>
 var D22=[[15.34,51.68,48.32],[29.33,51.06,48.94],[51.96,50.26,49.74],[67.76,49.99,50.01],[98.91,49.17,50.83],[100,49.10,50.90]];
 var M22=D22.map(function(r){return [r[0],r[2]-r[1]]});
@@ -176,4 +214,139 @@ function render(){
 }
 $("t22").innerHTML=D22.map(function(r){return "<tr><td>"+fmt(r[0])+"</td><td>"+fmt(r[1])+"</td><td>"+fmt(r[2])+"</td></tr>"}).join("");
 render();
+</script>
+<script>
+(function(){
+var BASE=[["PoderData","2026-10-07",3000,53],["Datafolha","2026-10-07",2520,52],["Vox Brasil","2026-10-07",2100,49.1],["AtlasIntel","2026-10-08",5026,52.8],["Ipespe/Abrapel","2026-10-08",1500,52.7],["DataTrends","2026-10-09",2000,53.1],["Futura","2026-10-10",2000,51.8],["PoderData","2026-10-12",3000,51],["Nexus/BTG","2026-10-12",2002,52],["Gerp","2026-10-12",2400,55],["Quaest","2026-10-13",2154,51.1],["Datafolha","2026-10-15",2520,51],["CNT/MDA","2026-10-15",2000,50.5],["Futura/100% Cidades","2026-10-15",2000,50.8],["PoderData/Aya","2026-10-15",3000,50],["Ipespe/Abrapel","2026-10-15",1500,51.2],["Gerp","2026-10-16",2400,52],["Veritá","2026-10-16",15554,51.1]].map(function(r,i){return {id:"b"+i,i:r[0],t:r[1],n:r[2],f:r[3]}});
+var SK="pesq26",S={add:[],del:[]};
+try{var s0=JSON.parse(localStorage.getItem(SK)||"null");if(s0&&s0.add&&s0.del)S=s0}catch(e){}
+function sv(){try{localStorage.setItem(SK,JSON.stringify(S))}catch(e){}}
+function day(s){var a=s.split("-");return (Date.UTC(+a[0],a[1]-1,+a[2])-Date.UTC(2026,9,5))/864e5}
+function hoje(){var n=new Date();return Math.min(20,Math.max(0,(Date.UTC(n.getFullYear(),n.getMonth(),n.getDate())-Date.UTC(2026,9,5))/864e5))}
+function dd(d){var x=new Date(Date.UTC(2026,9,5+Math.round(d)));return ("0"+x.getUTCDate()).slice(-2)+"/"+("0"+(x.getUTCMonth()+1)).slice(-2)}
+function lst(){return BASE.concat(S.add).filter(function(p){return S.del.indexOf(p.id)<0}).map(function(p){return {id:p.id,i:p.i,t:p.t,n:p.n,f:p.f,d:day(p.t)}}).sort(function(a,b){return a.d-b.d})}
+function cdf(z){var t=1/(1+0.2316419*Math.abs(z)),d=0.3989423*Math.exp(-z*z/2),p=d*t*(0.3193815+t*(-0.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));return z>0?1-p:p}
+function model(){
+ var A=lst(),T=hoje(),H=20-T,n=A.length;if(!n)return null;
+ var E=num($("pErr").value);if(isNaN(E)||E<0.3)E=2.5;
+ var w=A.map(function(p){return Math.sqrt(Math.min(p.n,3000))*Math.exp(-Math.max(0,T-p.d)/5)});
+ var sw=0,sw2=0;w.forEach(function(x){sw+=x;sw2+=x*x});
+ var wn=w.map(function(x){return x/(sw/n)});
+ var mean=0,md=0;A.forEach(function(p,i){mean+=wn[i]*p.f;md+=wn[i]*p.d});mean/=n;md/=n;
+ var sxx=0,sxy=0;A.forEach(function(p,i){sxx+=wn[i]*(p.d-md)*(p.d-md);sxy+=wn[i]*(p.d-md)*(p.f-mean)});
+ var sl=sxx>1?sxy/sxx:0;sl=Math.max(-0.4,Math.min(0.4,sl));
+ var seS=sxx>1?Math.min(0.4,1.63/Math.sqrt(sxx)):0.4,neff=sw*sw/sw2,se=1.63/Math.sqrt(neff);
+ var now=mean+sl*(T-md),ds=0.5*sl,fin=now+ds*H;
+ var sdF=Math.sqrt(se*se+Math.pow(seS*H*0.5,2)+E*E);
+ return {A:A,w:w,T:T,H:H,md:md,mean:mean,sl:sl,now:now,ds:ds,fin:fin,sdF:sdF,se:se,E:E,pF:cdf((fin-50)/sdF),neff:neff};
+}
+function draw(){
+ var m=model();
+ if(!m){$("qmF").textContent=$("qmL").textContent="–";$("ql2").innerHTML="<div class=mut>Nenhuma pesquisa. Adicione uma ou restaure a lista.</div>";$("qcnt").textContent="0";$("qs").innerHTML="";return}
+ $("qh1").textContent="Média hoje ("+dd(m.T)+")";
+ $("qmF").textContent=fmt(m.now,1)+"%";$("qmL").textContent=fmt(100-m.now,1)+"%";
+ var ni={};m.A.forEach(function(p){ni[p.i]=1});
+ $("qmN").textContent=m.A.length+" pesquisas · "+Object.keys(ni).length+" institutos · tendência "+(m.sl>=0?"+":"")+fmt(m.sl,2)+" pt/dia";
+ $("qpF").textContent=fmt(m.fin,1)+"%";$("qpL").textContent=fmt(100-m.fin,1)+"%";
+ $("qpI").textContent="IC 95% do Flávio: "+fmt(m.fin-1.96*m.sdF,1)+" a "+fmt(m.fin+1.96*m.sdF,1);
+ $("qcF").textContent="Flávio "+fmt(m.pF*100,0)+"%";$("qcL").textContent="Lula "+fmt((1-m.pF)*100,0)+"%";
+ var W=360,Ht=270,L=34,R=10,T0=10,B=26,s="",lo=44,hi=56;
+ function X(d){return L+d/20*(W-L-R)}function Y(v){v=Math.max(lo,Math.min(hi,v));return T0+(hi-v)/(hi-lo)*(Ht-T0-B)}
+ for(var v=lo;v<=hi;v+=2){s+="<line x1="+L+" x2="+(W-R)+" y1="+Y(v)+" y2="+Y(v)+" stroke='var(--line)'/><text x="+(L-4)+" y="+(Y(v)+4)+" font-size=10 text-anchor=end fill='var(--mut)'>"+v+"%</text>"}
+ [0,5,10,15,20].forEach(function(d){s+="<text x="+X(d)+" y="+(Ht-8)+" font-size=10 text-anchor=middle fill='var(--mut)'>"+dd(d)+"</text>"});
+ s+="<line x1="+L+" x2="+(W-R)+" y1="+Y(50)+" y2="+Y(50)+" stroke='var(--fg)' opacity=.5 stroke-dasharray='4 3'/>";
+ function val(d){return d<=m.T?m.mean+m.sl*(d-m.md):m.now+m.ds*(d-m.T)}
+ function sd(d){var s0=Math.sqrt(m.se*m.se+0.5*0.5);return d<=m.T?s0:s0+(m.sdF-s0)*(d-m.T)/Math.max(1,20-m.T)}
+ [[1,"var(--r)"],[-1,"var(--b)"]].forEach(function(c){
+  function f(d){return c[0]>0?val(d):100-val(d)}
+  var up="",dn="",d;
+  for(d=0;d<=20;d+=1){up+=(d?"L":"M")+X(d)+" "+Y(f(d)+1.96*sd(d))}
+  for(d=20;d>=0;d-=1){dn+="L"+X(d)+" "+Y(f(d)-1.96*sd(d))}
+  s+="<path d='"+up+dn+"Z' fill='"+c[1]+"' opacity=.12 />";
+  var a="",b="";for(d=0;d<=m.T+0.01;d+=0.5){a+=(a?"L":"M")+X(d)+" "+Y(f(d))}
+  for(d=m.T;d<=20.01;d+=0.5){b+=(b?"L":"M")+X(d)+" "+Y(f(d))}
+  s+="<path d='"+a+"' fill=none stroke='"+c[1]+"' stroke-width=2.5 /><path d='"+b+"' fill=none stroke='"+c[1]+"' stroke-width=2.5 stroke-dasharray='5 4' />";
+  var mw=Math.max.apply(null,m.w);
+  m.A.forEach(function(p,i){s+="<circle cx="+X(p.d)+" cy="+Y(c[0]>0?p.f:100-p.f)+" r="+(2+3*m.w[i]/mw)+" fill='"+c[1]+"' opacity=.45 />"});
+ });
+ s+="<line x1="+X(m.T)+" x2="+X(m.T)+" y1="+T0+" y2="+(Ht-B)+" stroke='var(--mut)' stroke-dasharray='2 3'/><text x="+(X(m.T)-3)+" y=20 font-size=10 text-anchor=end fill='var(--mut)'>hoje</text>";
+ s+="<text x="+(W-R-2)+" y=20 font-size=10 text-anchor=end fill='var(--mut)'>eleição</text>";
+ $("qs").innerHTML=s;
+ $("qcnt").textContent=m.A.length;
+ $("ql2").innerHTML=m.A.slice().reverse().map(function(p){return "<div class=pt><span>"+p.i+" · "+dd(p.d)+" · n "+p.n+"<br><small style='color:var(--mut)'>Flávio "+fmt(p.f,1)+" · Lula "+fmt(100-p.f,1)+"</small></span><button data-id='"+p.id+"' aria-label='Apagar'>✕</button></div>"}).join("");
+}
+$("pErr").oninput=draw;
+$("ql2").onclick=function(e){var id=e.target.getAttribute&&e.target.getAttribute("data-id");if(!id)return;
+ if(id.charAt(0)==="b"){if(S.del.indexOf(id)<0)S.del.push(id)}else S.add=S.add.filter(function(p){return p.id!==id});sv();draw()};
+$("qres").onclick=function(){S={add:[],del:[]};sv();draw()};
+function comp(a,b){return function(){var v=num(this.value);$(b).value=isNaN(v)?"":(Math.round((100-v)*100)/100+"").replace(".",",")}}
+$("qf").oninput=comp("qf","ql");$("ql").oninput=comp("ql","qf");
+try{$("qd").value=new Date().toISOString().slice(0,10)}catch(e){}
+$("qadd").onclick=function(){
+ var f=num($("qf").value),l=num($("ql").value),n=num($("qn").value),e=$("qerr"),nm=$("qi").value.trim(),dt=$("qd").value;
+ if(!nm){e.textContent="Informe o instituto.";return}
+ if(!dt){e.textContent="Informe a data final da pesquisa.";return}
+ if(isNaN(n)||n<100){e.textContent="Informe a amostra (número de entrevistados).";return}
+ if(isNaN(f)&&isNaN(l)){e.textContent="Informe a % de um candidato.";return}
+ if(isNaN(f))f=100-l;if(isNaN(l))l=100-f;
+ if(f<=0||f>=100){e.textContent="Percentuais entre 0 e 100.";return}
+ f=f/(f+l)*100;
+ S.add.push({id:"u"+Date.now(),i:nm,t:dt,n:n,f:Math.round(f*100)/100});sv();e.textContent="";
+ $("qi").value=$("qn").value=$("qf").value=$("ql").value="";draw();
+};
+function tab(a){$("pA").hidden=!a;$("pP").hidden=a;$("tA").className=a?"on":"";$("tP").className=a?"":"on";if(!a)draw()}
+$("tA").onclick=function(){tab(true)};$("tP").onclick=function(){tab(false)};
+window.__pm=model;
+window.__ps={get:function(){return S},set:function(v){S=v;sv();draw()}};
+})();
+</script>
+<script>
+(function(){
+var BK="bkp26",arm=false,tm;
+function ps(){return window.__ps}
+function snap(){return JSON.stringify({v:1,apuracao:pts,pesquisas:ps().get()})}
+function hash(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return h}
+function lastB(){try{return JSON.parse(localStorage.getItem(BK)||"null")}catch(e){return null}}
+function hasData(){var s=ps().get();return pts.length>0||s.add.length>0||s.del.length>0}
+function when(t){var d=new Date(t),z=function(n){return ("0"+n).slice(-2)};return z(d.getDate())+"/"+z(d.getMonth()+1)+" "+z(d.getHours())+":"+z(d.getMinutes())}
+function msg(t,er){var e=$("bmsg");e.textContent=t;e.style.color=er?"var(--bad)":"var(--ok)"}
+function check(){
+ var b=lastB(),cur=snap(),ok=!hasData()||(b&&b.h===hash(cur));
+ $("bnote").hidden=!!ok;
+ if($("bt").value!==cur)$("bt").value=cur;
+ $("bst2").textContent=b?"Último backup: "+when(b.t)+(ok?" (dados iguais aos de agora)":" (há dados novos depois)"):"Nenhum backup feito ainda.";
+}
+function mark(){try{localStorage.setItem(BK,JSON.stringify({h:hash(snap()),t:Date.now()}))}catch(e){}check()}
+function copy(){
+ var s=snap(),t=$("bt");t.value=s;
+ function done(){mark();msg("Backup copiado. Cole em um lugar seguro (notas ou mensagem pra você mesmo).",false)}
+ function fb(){try{t.removeAttribute("readonly");t.select();t.setSelectionRange(0,999999);var r=document.execCommand("copy");t.setAttribute("readonly","");if(r)done();else msg("Não consegui copiar. Segure o texto acima e escolha Copiar.",true)}catch(e){msg("Não consegui copiar. Segure o texto acima e escolha Copiar.",true)}}
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(s).then(done,fb);else fb();
+}
+function dl(){try{var b=new Blob([snap()],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="apuracao-backup.json";document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a)},500);mark();msg("Arquivo gerado.",false)}catch(e){msg("Não consegui baixar. Use o botão Copiar backup.",true)}}
+function clean(s){return String(s).replace(/[<>&"']/g,"").slice(0,40)}
+function valid(o){
+ if(!o||o.v!==1||!Array.isArray(o.apuracao)||!o.pesquisas||!Array.isArray(o.pesquisas.add)||!Array.isArray(o.pesquisas.del))return null;
+ var a=[],ad=[],i,p;
+ for(i=0;i<o.apuracao.length;i++){p=o.apuracao[i];if(!p||!isFinite(p.x)||!isFinite(p.f)||!isFinite(p.l)||p.x<=0||p.x>100)return null;a.push({x:+p.x,f:+p.f,l:+p.l})}
+ for(i=0;i<o.pesquisas.add.length;i++){p=o.pesquisas.add[i];if(!p||typeof p.id!=="string"||!/^[A-Za-z0-9_-]+$/.test(p.id)||typeof p.i!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(p.t)||!isFinite(p.n)||!isFinite(p.f))return null;ad.push({id:p.id,i:clean(p.i),t:p.t,n:+p.n,f:+p.f})}
+ a.sort(function(x,y){return x.x-y.x});
+ return {a:a,s:{add:ad,del:o.pesquisas.del.filter(function(x){return typeof x==="string"&&/^[A-Za-z0-9_-]+$/.test(x)})}};
+}
+function reset(){clearTimeout(tm);arm=false;$("bim").textContent="Restaurar texto"}
+function imp(){
+ var o;try{o=JSON.parse($("bi").value)}catch(e){msg("Texto inválido. Cole o backup completo.",true);return}
+ var v=valid(o);if(!v){msg("Esse texto não parece um backup deste app.",true);return}
+ if(hasData()&&!arm){arm=true;$("bim").textContent="Tem certeza? Troca tudo";tm=setTimeout(reset,4000);return}
+ reset();pts=v.a;save();ps().set(v.s);render();$("bi").value="";mark();
+ msg("Restaurado: "+v.a.length+" dado(s) de apuração e "+v.s.add.length+" pesquisa(s) adicionada(s) por você.",false);
+}
+$("bcp").onclick=copy;$("bdl").onclick=dl;$("bim").onclick=imp;
+$("bfl").onclick=function(){$("bf").click()};
+$("bf").onchange=function(){var f=this.files&&this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){$("bi").value=String(r.result);msg("Arquivo lido. Toque em Restaurar texto para aplicar.",false)};r.readAsText(f);this.value=""};
+$("bgo").onclick=function(){copy();try{$("bk").scrollIntoView({behavior:"smooth"})}catch(e){}};
+$("bst").textContent="Armazenamento protegido: verificando...";
+try{if(navigator.storage&&navigator.storage.persist){navigator.storage.persisted().then(function(p){return p||navigator.storage.persist()}).then(function(p){$("bst").textContent=p?"Armazenamento protegido pelo navegador: sim.":"Armazenamento protegido: ainda não. Instale o site na tela inicial pra ajudar."}).catch(function(){$("bst").textContent="Armazenamento protegido: não deu pra verificar."})}else $("bst").textContent="Seu navegador não oferece proteção extra. Use o backup."}catch(e){}
+setInterval(check,2000);check();
+})();
 </script></body></html>
