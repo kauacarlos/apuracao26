@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Apuração 2026 x 2022</title>
+<style>
+:root{--bg:#f4f4f1;--fg:#1d1d1b;--mut:#6b6b66;--card:#fff;--line:#dcdcd6;--a:#0f766e;--g:#8a8a84;--p:#d97706;--t:#7c3aed;--bad:#b91c1c;--ok:#15803d;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121211;--fg:#eeeeea;--mut:#a3a39d;--card:#1c1c1a;--line:#33332f;--a:#2dd4bf;--g:#9a9a94;--p:#fbbf24;--t:#a78bfa;--bad:#f87171;--ok:#4ade80;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121211;--fg:#eeeeea;--mut:#a3a39d;--card:#1c1c1a;--line:#33332f;--a:#2dd4bf;--g:#9a9a94;--p:#fbbf24;--t:#a78bfa;--bad:#f87171;--ok:#4ade80;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0 auto;max-width:560px;padding:12px;background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,-apple-system,sans-serif}
+h1{font-size:18px;margin:2px 0 10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+.row{display:flex;gap:8px}
+.row label{flex:1;font-size:12px;color:var(--mut)}
+input{width:100%;box-sizing:border-box;margin-top:4px;padding:12px 8px;font-size:18px;text-align:center;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg)}
+button{font-size:15px;padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--fg)}
+button.main{background:var(--a);color:#fff;border-color:var(--a);flex:2;font-weight:600}
+.btns{display:flex;gap:8px;margin-top:10px}.btns button{flex:1}
+.err{color:var(--bad);font-size:13px;min-height:4px;margin-top:6px}
+svg{width:100%;height:auto;display:block}
+.big{font-size:26px;font-weight:800;line-height:1.15}
+.mut{color:var(--mut);font-size:13px}
+.pt{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid var(--line);font-size:14px}
+.pt button{padding:4px 11px}
+.m{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.m i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.m small{display:block;color:var(--mut);font-size:12px}
+.m b{white-space:nowrap}
+details summary{cursor:pointer;color:var(--mut);font-size:13px}
+table{width:100%;font-size:13px;border-collapse:collapse;margin-top:6px}td,th{padding:3px 4px;text-align:right}
+</style></head><body>
+<h1>Apuração 2º turno: 2026 x 2022</h1>
+
+<div class="card">
+<div class="row">
+<label>% urnas<input id="x" inputmode="decimal" placeholder="40"></label>
+<label>% Flávio<input id="f" inputmode="decimal" placeholder="51,2"></label>
+<label>% Lula<input id="l" inputmode="decimal" placeholder="48,8"></label>
+</div>
+<div class="mut" style="margin-top:6px">Digite um candidato e o outro completa sozinho.</div>
+<div class="err" id="err"></div>
+<div class="btns"><button id="undo">Desfazer</button><button class="main" id="add">Adicionar</button></div>
+</div>
+
+<div class="card" id="ver"></div>
+<div class="card"><svg id="ch" viewBox="0 0 360 290"></svg><div class="mut" id="leg"></div></div>
+<div class="card" id="mets"></div>
+
+<div class="card">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><b>Seus dados</b><button id="rst">Zerar tudo</button></div>
+<div id="list"></div>
+</div>
+
+<div class="card"><details><summary>Dados de 2022 usados (votos válidos)</summary>
+<table><tr><th>% urnas</th><th>Bolsonaro</th><th>Lula</th></tr><tbody id="t22"></tbody></table>
+<div class="mut" style="margin-top:6px">Entre os pontos o app liga uma linha reta. Abaixo de 15,34% não há dado: em 2022 Lula começou na frente e logo foi ultrapassado, então a comparação com 2022 não vale nessa faixa. Fontes: TSE e Agência Brasil.</div></details></div>
+
+<script>
+var D22=[[15.34,51.68,48.32],[29.33,51.06,48.94],[51.96,50.26,49.74],[67.76,49.99,50.01],[98.91,49.17,50.83],[100,49.10,50.90]];
+var M22=D22.map(function(r){return [r[0],r[2]-r[1]]});
+var KEY="apuracao26",pts=[];
+try{pts=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){pts=[]}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(pts))}catch(e){}}
+function $(i){return document.getElementById(i)}
+function fmt(n,d){return n.toFixed(d==null?2:d).replace(".",",")}
+function sg(n,d){return (n>0?"+":"")+fmt(n,d)}
+function mg(p){return p.l-p.f}
+function m22(x){
+ if(x<=M22[0][0])return M22[0][1];
+ for(var i=1;i<M22.length;i++){if(x<=M22[i][0]){var a=M22[i-1],b=M22[i];return a[1]+(b[1]-a[1])*(x-a[0])/(b[0]-a[0])}}
+ return M22[M22.length-1][1];
+}
+function num(s){s=String(s).trim().replace(",",".");return s===""?NaN:Number(s)}
+$("f").oninput=function(){var v=num(this.value);$("l").value=isNaN(v)?"":fmt(100-v).replace(/0$/,"")};
+$("l").oninput=function(){var v=num(this.value);$("f").value=isNaN(v)?"":fmt(100-v).replace(/0$/,"")};
+["x","f","l"].forEach(function(i){$(i).onkeydown=function(e){if(e.key==="Enter")add()}});
+function add(){
+ var x=num($("x").value),f=num($("f").value),l=num($("l").value),e=$("err");
+ if(isNaN(x)||x<=0||x>100){e.textContent="Informe a % de urnas (entre 0 e 100).";return}
+ if(isNaN(f)&&isNaN(l)){e.textContent="Informe a % de um candidato.";return}
+ if(isNaN(f))f=100-l;if(isNaN(l))l=100-f;
+ if(f<0||l<0||f>100||l>100){e.textContent="Percentuais entre 0 e 100.";return}
+ var s=f+l;if(Math.abs(s-100)>0.05){f=f/s*100;l=l/s*100}
+ pts=pts.filter(function(p){return p.x!==x});pts.push({x:x,f:f,l:l});pts.sort(function(a,b){return a.x-b.x});
+ save();e.textContent="";$("x").value=$("f").value=$("l").value="";$("x").focus();render();
+}
+$("add").onclick=add;
+$("undo").onclick=function(){pts.pop();save();render()};
+var armed=false,tm;
+$("rst").onclick=function(){
+ if(!armed){armed=true;$("rst").textContent="Tem certeza?";tm=setTimeout(function(){armed=false;$("rst").textContent="Zerar tudo"},3000);return}
+ clearTimeout(tm);armed=false;$("rst").textContent="Zerar tudo";pts=[];save();render();
+};
+function delPt(i){pts.splice(i,1);save();render()}
+
+function cross(fn,x0){for(var x=x0;x<=100.0001;x+=0.1){if(fn(x)>=0)return x}return null}
+function slope(p){
+ var q=pts.slice(-5).map(function(z){return [z.x,mg(z)-m22(z.x)]}),n=q.length,mx=0,my=0,cv=0,vr=0;
+ q.forEach(function(v){mx+=v[0];my+=v[1]});mx/=n;my/=n;
+ q.forEach(function(v){cv+=(v[0]-mx)*(v[1]-my);vr+=(v[0]-mx)*(v[0]-mx)});
+ return vr>0?cv/vr:0;
+}
+function methods(){
+ var n=pts.length,L=[];if(!n)return L;
+ var p=pts[n-1],m=mg(p),d=m-m22(p.x);
+ if(n>=2){
+  var b=pts[Math.max(0,n-3)],r=(m*p.x-mg(b)*b.x)/(p.x-b.x);
+  L.push({n:"Ritmo atual dos seus dados",s:"Os últimos votos apurados dão Lula "+sg(r,1)+" ponto(s). Se esse ritmo continuar...",c:"var(--a)",fn:function(x){return (m*p.x+r*(x-p.x))/x}});
+ }
+ L.push({n:"Como 2022 (distância fixa)",s:"Mantém a diferença atual para a curva de 2022 ("+sg(d,2)+").",c:"var(--p)",fn:function(x){return m22(x)+d}});
+ if(n>=3){var sl=slope(p);L.push({n:"2022 + tendência",s:"A diferença para 2022 continua mudando como vem mudando.",c:"var(--t)",fn:function(x){return m22(x)+d+sl*(x-p.x)}})}
+ L.forEach(function(o){o.x=m<0?cross(o.fn,p.x):p.x;o.fin=o.fn(100)});
+ return L;
+}
+function verdict(L){
+ if(!pts.length)return "<div class=mut>Adicione o primeiro dado. Com 2 dados já aparece a previsão pela tendência.</div>";
+ var p=pts[pts.length-1],m=mg(p),h="";
+ if(m>0)return "<div class=mut>Com "+fmt(p.x,1)+"% das urnas</div><div class=big style='color:var(--ok)'>Lula já está na frente</div><div class=mut>Vantagem de "+fmt(m,2)+" ponto(s) nesse momento.</div>";
+ var xs=L.filter(function(o){return o.x!==null}).map(function(o){return o.x}).sort(function(a,b){return a-b});
+ h+="<div class=mut>Com "+fmt(p.x,1)+"% das urnas Flávio está "+fmt(-m,2)+" ponto(s) à frente</div>";
+ if(!xs.length)h+="<div class=big style='color:var(--bad)'>Sem virada prevista</div><div class=mut>Nenhum método indica virada até 100% das urnas.</div>";
+ else{
+  var med=xs[Math.floor(xs.length/2)],rg=xs.length>1&&xs[xs.length-1]-xs[0]>0.5?"Entre "+fmt(xs[0],1)+"% e "+fmt(xs[xs.length-1],1)+"%. ":"";
+  h+="<div class=big style='color:var(--ok)'>Virada por volta de "+fmt(med,1)+"%</div><div class=mut>"+rg+xs.length+" de "+L.length+" métodos indicam virada.</div>";
+ }
+ if(p.x<15.34)h+="<div class=mut style='margin-top:6px'>⚠ Abaixo de 15% a comparação com 2022 não vale. Confie mais no ritmo atual.</div>";
+ return h+"<div class=mut style='margin-top:6px'>Estimativa, não garantia. Depende de quais estados faltam apurar.</div>";
+}
+function mets(L){
+ if(!L.length)return "<b>Métodos de previsão</b><div class=mut>Aparecem quando houver dados.</div>";
+ var m=pts.length?mg(pts[pts.length-1]):0;
+ return "<b>Métodos de previsão</b>"+L.map(function(o){
+  var t=m>0?"Lula na frente":o.x===null?"não vira":"vira ~"+fmt(o.x,1)+"%";
+  var lf=50+o.fin/2;
+  return "<div class=m><span><i style='background:"+o.c+"'></i>"+o.n+"<small>"+o.s+"</small><small>Final: Lula "+fmt(lf,1)+" x Flávio "+fmt(100-lf,1)+"</small></span><b>"+t+"</b></div>";
+ }).join("");
+}
+function chart(L){
+ var W=360,H=290,Lm=40,R=10,T=26,B=26,svg="",i;
+ var vals=[0];for(i=0;i<=100;i+=2)vals.push(m22(i));
+ pts.forEach(function(p){vals.push(mg(p))});
+ L.forEach(function(o){vals.push(o.fin)});
+ var lo=Math.min.apply(null,vals)-0.5,hi=Math.max.apply(null,vals)+0.5;
+ function X(v){return Lm+v/100*(W-Lm-R)}function Y(v){return T+(hi-v)/(hi-lo)*(H-T-B)}
+ var st=Math.max(0.5,Math.ceil((hi-lo)/5*2)/2);
+ svg+="<rect x="+Lm+" y="+T+" width="+(W-Lm-R)+" height="+(Y(0)-T)+" fill='var(--ok)' opacity='.07'/>";
+ for(var v=Math.ceil(lo/st)*st;v<=hi;v+=st){svg+="<line x1="+Lm+" x2="+(W-R)+" y1="+Y(v)+" y2="+Y(v)+" stroke='var(--line)'/><text x="+(Lm-4)+" y="+(Y(v)+4)+" font-size=10 text-anchor=end fill='var(--mut)'>"+fmt(v,1)+"</text>"}
+ [0,25,50,75,100].forEach(function(v){svg+="<text x="+X(v)+" y="+(H-8)+" font-size=10 text-anchor=middle fill='var(--mut)'>"+v+"%</text>"});
+ svg+="<line x1="+Lm+" x2="+(W-R)+" y1="+Y(0)+" y2="+Y(0)+" stroke='var(--fg)' stroke-width=1.5 opacity=.6 />";
+ svg+="<text x="+(W-R-2)+" y="+(Y(0)-4)+" font-size=10 text-anchor=end fill='var(--ok)'>Lula na frente ▲</text><text x="+(W-R-2)+" y="+(Y(0)+13)+" font-size=10 text-anchor=end fill='var(--bad)'>Flávio na frente ▼</text>";
+ var path="";for(i=0;i<=100;i++){path+=(i?"L":"M")+X(i)+" "+Y(m22(i))}
+ svg+="<path d='"+path+"' fill=none stroke='var(--g)' stroke-width=2.5 />";
+ svg+="<circle cx="+X(67.76)+" cy="+Y(0)+" r=4 fill='var(--card)' stroke='var(--g)' stroke-width=2 /><text x="+X(67.76)+" y="+(Y(0)+26)+" font-size=9 text-anchor=middle fill='var(--g)'>virada 2022</text>";
+ if(pts.length){
+  var p=pts[pts.length-1],m=mg(p),xs=[];
+  L.forEach(function(o){var s="";for(i=p.x;i<=100;i+=1){s+=(s?"L":"M")+X(i)+" "+Y(o.fn(i))}
+   svg+="<path d='"+s+"' fill=none stroke='"+o.c+"' stroke-width=2 stroke-dasharray='3 4' />";if(o.x!==null&&m<0)xs.push(o.x)});
+  var l="";pts.forEach(function(q,k){l+=(k?"L":"M")+X(q.x)+" "+Y(mg(q))});
+  svg+="<path d='"+l+"' fill=none stroke='var(--a)' stroke-width=3 />";
+  pts.forEach(function(q){svg+="<circle cx="+X(q.x)+" cy="+Y(mg(q))+" r=4 fill='var(--a)'/>"});
+  if(m<0&&xs.length){
+   xs.sort(function(a,b){return a-b});var med=xs[Math.floor(xs.length/2)],ax=Math.min(Math.max(X(med),52),W-52);
+   if(xs[xs.length-1]-xs[0]>0.3)svg+="<rect x="+X(xs[0])+" y="+T+" width="+Math.max(2,X(xs[xs.length-1])-X(xs[0]))+" height="+(H-T-B)+" fill='var(--ok)' opacity='.18'/>";
+   svg+="<line x1="+X(med)+" x2="+X(med)+" y1="+T+" y2="+(H-B)+" stroke='var(--ok)' stroke-width=2 stroke-dasharray='5 3' />";
+   svg+="<rect x="+(ax-48)+" y=2 width=96 height=20 rx=10 fill='var(--ok)' /><text x="+ax+" y=16 font-size=11 font-weight=700 text-anchor=middle fill='#fff'>Virada ~"+fmt(med,1)+"%</text>";
+   svg+="<circle cx="+X(med)+" cy="+Y(0)+" r=5 fill='var(--ok)'/>";
+  }else if(m<0){svg+="<rect x="+(W/2-70)+" y=2 width=140 height=20 rx=10 fill='var(--bad)' /><text x="+(W/2)+" y=16 font-size=11 font-weight=700 text-anchor=middle fill='#fff'>Sem virada prevista</text>"}
+  else svg+="<rect x="+(W/2-70)+" y=2 width=140 height=20 rx=10 fill='var(--ok)' /><text x="+(W/2)+" y=16 font-size=11 font-weight=700 text-anchor=middle fill='#fff'>Lula já na frente</text>";
+ }
+ $("ch").innerHTML=svg;
+ $("leg").innerHTML="Linha cinza: 2022 · Linha verde-água: seus dados · Tracejadas: previsões. Eixo vertical: Lula − adversário, em pontos.";
+}
+function render(){
+ var L=methods();$("ver").innerHTML=verdict(L);chart(L);$("mets").innerHTML=mets(L);
+ $("list").innerHTML=pts.length?pts.map(function(p,i){return "<div class=pt><span>"+fmt(p.x,1)+"% · Flávio "+fmt(p.f)+" · Lula "+fmt(p.l)+"</span><button onclick='delPt("+i+")' aria-label='Apagar'>✕</button></div>"}).join(""):"<div class=mut>Nenhum dado ainda.</div>";
+}
+$("t22").innerHTML=D22.map(function(r){return "<tr><td>"+fmt(r[0])+"</td><td>"+fmt(r[1])+"</td><td>"+fmt(r[2])+"</td></tr>"}).join("");
+render();
+</script></body></html>
